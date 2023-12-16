@@ -46,6 +46,7 @@ func main() {
 }
 func safeRegisterApolloPortal() {
 	defer func() {
+		//fasdfasf
 		// 处理 registerApolloPortal() 出现的 panic 错误
 		r := recover()
 		if (interface{})(r) != nil {
