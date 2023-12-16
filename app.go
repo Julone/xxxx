@@ -39,7 +39,7 @@ func main() {
 	fmt.Printf("%v, %v", <-c, <-c)
 	safeRegisterApolloPortal()
 	app.Use(func(c *fiber.Ctx) error {
-		return c.SendStatus(404) // => 404 "Not Found"
+		return c.SendStatus(404) // => 404 "Not Found"asdfsadfas saf ads
 	})
 
 	log.Fatal(app.Listen(":3000"))
