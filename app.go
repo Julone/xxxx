@@ -39,14 +39,14 @@ func main() {
 	fmt.Printf("%v, %v", <-c, <-c)
 	safeRegisterApolloPortal()
 	app.Use(func(c *fiber.Ctx) error {
-		return c.SendStatus(404) // => 404 "Not Found"
+		return c.SendStatus(404) // => 404 "Not Found"asdfas
 	})
 
 	log.Fatal(app.Listen(":3000"))
 }
 func safeRegisterApolloPortal() {
 	defer func() {
-		// 处理 registerApolloPortal() 出现的 panic 错误
+		// 处理 registerApolloPortal()asfddsaa 出现的 panic 错误
 		r := recover()
 		if (interface{})(r) != nil {
 			log.Error("panic when register apollo portal to platform. err: %v", r)
