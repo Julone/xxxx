@@ -2,7 +2,6 @@ package routes
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"gorm-mysql/database"
 	"gorm-mysql/models"
 	"gorm.io/gorm"
@@ -38,7 +37,7 @@ func GetBook(c *fiber.Ctx) error {
 
 // AllBooks
 func AllBooks(c *fiber.Ctx) error {
-	books := []models.Book{}
+	var books []models.Book
 
 	database.DBConn.Preload("PageInfo").
 		Preload("PageInfo.WriterInfo").
@@ -47,14 +46,8 @@ func AllBooks(c *fiber.Ctx) error {
 		}).
 		Preload("PageInfo.Comment.SenderInfo").
 		Find(&books)
-	newComment := &models.Comments{Content: uuid.New().String(), SenderID: 2, PageID: 3}
-	database.DBConn.Create(newComment)
-	// 处理一下这个数据
 
-	for _, val := range books {
-		val.BeforeCreate(database.DBConn)
-	}
-	return c.Status(200).JSON(books)
+	return c.Status(200).JSON(fiber.Map{"success": true, "data": books})
 }
 
 // Update

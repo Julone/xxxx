@@ -1,17 +1,52 @@
 package database
 
 import (
+	"fmt"
 	"gorm-mysql/models"
 	"log"
 	"os"
+	"strings"
+	"sync"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var (
 	DBConn *gorm.DB
 )
+
+type dummyCacher struct {
+	store *sync.Map
+}
+
+func (c *dummyCacher) init() {
+	if c.store == nil {
+		c.store = &sync.Map{}
+	}
+}
+
+func (c *dummyCacher) Get(key string) interface{} {
+	fmt.Printf("%v\n", key)
+	if strings.HasPrefix(key, "SELECT * FROM `users`") {
+		c.store.Delete(key)
+
+	}
+	c.init()
+	val, ok := c.store.Load(key)
+	if !ok {
+		return nil
+	}
+
+	return val.(interface{})
+}
+
+func (c *dummyCacher) Store(key string, val interface{}) error {
+	c.init()
+	c.store.Store(key, val)
+	return nil
+}
 
 // connectDb
 func ConnectDb() {
@@ -27,7 +62,18 @@ func ConnectDb() {
 	//f,_ := os.OpenFile("./test.txt", os.O_APPEND | os.O_CREATE | os.O_WRONLY, 0777)
 	//mainL.SetOutput(f)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			//TablePrefix: "mps-",
+		},
+	})
+
+	db.Callback().Query().After("gorm:query").Register("my_plugin:after_query", AfterQuery)
+	//cachesPlugin := &caches.Caches{Conf: &caches.Config{
+	//	Easer:  true,
+	//	Cacher: &dummyCacher{},
+	//}}
+	//_ = db.Use(cachesPlugin)
 	//db = db.Debug()
 	//db.Use(dbresolver.Register(dbresolver.Config{
 	//	// use `db2` as sources, `db3`, `db4` as replicas

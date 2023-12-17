@@ -15,6 +15,7 @@ type Book struct {
 	Author   string `json:"author"`
 	PageId   int    `json:"page_id" gorm:"type:bigint(0);default:0"`
 	PageInfo *Page  `json:"page_info" gorm:"foreignKey:PageId"`
+	Area     string `json:"area" gorm:"column:area"`
 }
 
 type Page struct {
@@ -60,7 +61,6 @@ func (b *Book) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (b *Book) AfterFind(db *gorm.DB) error {
-	b.UpdatedAt = time.Now()
 	return nil
 }
 

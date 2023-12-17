@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2/log"
 	"gorm-mysql/database"
+	"gorm-mysql/middleware"
 	"gorm-mysql/models"
 	"gorm-mysql/routes"
 
@@ -13,7 +14,9 @@ import (
 
 func setUpRoutes(app *fiber.App) {
 	app.Get("/hello", routes.Hello)
-	app.Get("/allbooks", routes.AllBooks)
+	app.Get("/allbooks", middleware.DefaultTimer[models.Book](func(item models.Book) bool {
+		return item.ID == 1
+	}), routes.AllBooks)
 	app.Get("/book/:id", routes.GetBook)
 	app.Post("/book", routes.AddBook)
 	app.Put("/book/:id", routes.Update)
@@ -25,14 +28,14 @@ func setUpRoutes(app *fiber.App) {
 func main() {
 	database.ConnectDb()
 	app := fiber.New()
-
+	app.Use(cors.New())
+	//app.Use()
 	setUpRoutes(app)
 	go func() {
 		database.DBConn.AutoMigrate(&models.Book{}, &models.Page{}, &models.User{})
 		database.DBConn.AutoMigrate(&models.Comments{})
 	}()
 
-	app.Use(cors.New())
 	c := make(chan int, 1)
 	go DoAdd(c, 12, 34, 2, 4)
 	go DoAdd(c, 12, 34, 2, 40)
